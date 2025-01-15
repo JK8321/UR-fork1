@@ -1,0 +1,136 @@
+NALOGA 1:
+.text
+.org 0x20
+@spremenljivke
+
+TABELA: .space 8
+
+.align
+.global _start
+_start:
+@program
+
+adr r0, TABELA
+mov r1, #0xFF
+
+ZANKA:
+	strb r1, [r0]
+	add r0, r0, #1
+	cmp r0, r2
+	blt ZANKA
+
+
+end: b end
+
+
+NALOGA 2:
+.text
+.org 0x20
+@spremenljivke
+
+@ predznačena števila!!!
+TABELA: .byte 192,155,224,48,0,128,99,147,177,100
+REZULTAT: .hword 0
+STEVEC: .word 0
+
+.align
+.global _start
+_start:
+@program
+
+@ Kaj je potrebno spremeniti, če so elementi tabele 16-bitna števila in je REZULTAT 32-bitna spremenljivka?
+adr r0, TABELA
+adr r2, REZULTAT
+adr r3, STEVEC
+
+mov r1, #0 @ števec števil
+mov r4, #0 @ začetni rezultat
+mov r5, #0 @ začetni indeks
+
+
+ZANKA:
+	ldrsb r6, [r0, r5] @ load naslednji bajt iz tabele, LDRSH če so 16-bitni
+	add r4, r4, r6 @ rezulat = rezultat + bajt
+	cmp r6, #100 @ primerjaj bajt in vrednost 100
+	ble MANJSI @ če ni, skoči na zanko
+
+	add r1, r1, #1 @ če je število večje od 100
+    
+MANJSI:
+    add r5, r5, #1 @ povečaj indeks zanke
+    cmp r5, #10 @ poglej če smo pogledali vse
+    blt ZANKA @ če ne, ponovi
+
+    strh r4, [r2] @ shrani vsoto v REZULTAT, STR če je REZULTAT 32-biten
+    str r1, [r3] @ shrani števec velikih števil v STEVEC
+
+
+end: b end
+
+NALOGA 3:
+.text
+.org 0x20
+@ spremenljivke
+
+NIZ: .asciz "Zunaj je mraz, sneg in poledica."
+
+.align
+.global _start
+_start:
+@program
+
+adr r0, NIZ @ naslov niza
+mov r1, #0 @ števec presledkov
+
+ZANKA:
+    ldrb r2, [r0], #1 @ naloži naslednji znak in premakni r0 (NIZ)
+    cmp r2, #0 @ null terminator (za konec niza)
+    beq end @ Če je znak ničla, končaj zanko
+
+    cmp r2, #' ' @ je znak presledek?
+    bne ZANKA @ če ni presledek pojdi naprej
+
+    add r1, r1, #1      @ Če je presledek, poveča števec v r1
+    b ZANKA             @ Ponavljaj zanko
+
+end: 
+    b end               @ Zanka, da program ne konča
+
+
+NALOGA 4:
+.text
+.org 0x20
+@ spremenljivke
+
+@ tabela s 14 16-bitnimi vrednostmi
+TABELA: .hword 1,100,-255,24,-88,31,56,192,155,-224,0,101,-199,47 @ 16-bitna!!
+
+.align
+.global _start
+_start:
+@program
+
+adr r0, TABELA @ naslov tabele v r0
+mov r5, #0 @ indeks tabele
+mov r7, #0xFF9C @ -100
+
+ZANKA:
+    add r6, r0, r5, lsl #1 
+	ldrh r6, [r6] @ nov element iz tabele v r6
+	
+    cmp r6, r7 @ preveri, ali je večji ali enak -100
+    bge USTREZA @ Če je večji ali enak -100, preskoči
+    
+    cmp r6, #100 @ Preveri, ali je manjši od 100
+    blt USTREZA @ če je manjši 100, preskoči
+
+    mov r6, #0 @ če je vrednost elementa med (in vključno z -100) in 100
+    strh r6, [r6] @ shrani nazaj v tabelo
+
+USTREZA:
+    add r5, r5, #1 @ povečaj indeks
+    cmp r5, #14 @ ali smo pregledali vse?
+    blt ZANKA @ Če ne, ponovi
+
+end:
+    b end
